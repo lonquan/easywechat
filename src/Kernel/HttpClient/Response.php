@@ -2,18 +2,27 @@
 
 namespace EasyWeChat\Kernel\HttpClient;
 
+use function array_key_exists;
 use ArrayAccess;
+use function base64_encode;
 use Closure;
-use Http\Discovery\Exception\NotFoundException;
-use Http\Discovery\Psr17FactoryDiscovery;
 use EasyWeChat\Kernel\Contracts\Arrayable;
 use EasyWeChat\Kernel\Contracts\Jsonable;
 use EasyWeChat\Kernel\Exceptions\BadMethodCallException;
 use EasyWeChat\Kernel\Exceptions\BadResponseException;
 use EasyWeChat\Kernel\Support\Xml;
+use function file_put_contents;
+use Http\Discovery\Exception\NotFoundException;
+use Http\Discovery\Psr17FactoryDiscovery;
+use function json_encode;
+use const JSON_UNESCAPED_UNICODE;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use function sprintf;
+use function str_contains;
+use function str_starts_with;
+use function strtolower;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpClient\Response\StreamableInterface;
 use Symfony\Component\HttpClient\Response\StreamWrapper;
@@ -24,18 +33,10 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Throwable;
-use function array_key_exists;
-use function base64_encode;
-use function file_put_contents;
-use function json_encode;
-use function sprintf;
-use function str_contains;
-use function str_starts_with;
-use function strtolower;
-use const JSON_UNESCAPED_UNICODE;
 
 /**
  * @implements \ArrayAccess<array-key, mixed>
+ *
  * @see \Symfony\Contracts\HttpClient\ResponseInterface
  */
 class Response implements Jsonable, Arrayable, ArrayAccess, ResponseInterface, StreamableInterface
@@ -79,7 +80,7 @@ class Response implements Jsonable, Arrayable, ArrayAccess, ResponseInterface, S
      */
     public function isSuccessful(): bool
     {
-        return !$this->isFailed();
+        return ! $this->isFailed();
     }
 
     /**
@@ -177,7 +178,7 @@ class Response implements Jsonable, Arrayable, ArrayAccess, ResponseInterface, S
         $streamFactory ??= $responseFactory instanceof StreamFactoryInterface ? $responseFactory : null;
 
         if (null === $responseFactory || null === $streamFactory) {
-            if (!class_exists(Psr17Factory::class) && !class_exists(Psr17FactoryDiscovery::class)) {
+            if (! class_exists(Psr17Factory::class) && ! class_exists(Psr17FactoryDiscovery::class)) {
                 throw new \LogicException('You cannot use the "Symfony\Component\HttpClient\Psr18Client" as no PSR-17 factories have been provided. Try running "composer require nyholm/psr7".');
             }
 
@@ -186,7 +187,7 @@ class Response implements Jsonable, Arrayable, ArrayAccess, ResponseInterface, S
                 $responseFactory ??= $psr17Factory ?? Psr17FactoryDiscovery::findResponseFactory(); /** @phpstan-ignore-line */
                 $streamFactory ??= $psr17Factory ?? Psr17FactoryDiscovery::findStreamFactory(); /** @phpstan-ignore-line */
 
-            /** @phpstan-ignore-next-line */
+                /** @phpstan-ignore-next-line */
             } catch (NotFoundException $e) {
                 throw new \LogicException('You cannot use the "Symfony\Component\HttpClient\HttplugClient" as no PSR-17 factories have been found. Try running "composer require nyholm/psr7".', 0, $e);
             }
@@ -333,6 +334,7 @@ class Response implements Jsonable, Arrayable, ArrayAccess, ResponseInterface, S
 
     /**
      * @return array<array-key, mixed>
+     *
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface

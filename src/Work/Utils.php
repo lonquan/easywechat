@@ -22,7 +22,6 @@ class Utils
     /**
      * @param  array<string>  $jsApiList
      * @param  array<string>  $openTagList
-     *
      * @return array<string, mixed>
      *
      * @throws RedirectionExceptionInterface
@@ -50,7 +49,6 @@ class Utils
     /**
      * @param  array<string>  $jsApiList
      * @param  array<string>  $openTagList
-     *
      * @return array<string, mixed>
      *
      * @throws RedirectionExceptionInterface

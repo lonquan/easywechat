@@ -23,8 +23,8 @@ class Utils
      * @param  array<string>  $jsApiList
      * @param  array<string>  $openTagList
      * @param  bool  $debug
-     *
      * @return array<string, mixed>
+     *
      * @throws HttpException
      * @throws InvalidArgumentException
      * @throws ClientExceptionInterface

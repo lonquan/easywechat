@@ -2,10 +2,10 @@
 
 namespace EasyWeChat\Kernel\Support;
 
-use EasyWeChat\Kernel\Contracts\Aes;
-use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 use function base64_decode;
 use function base64_encode;
+use EasyWeChat\Kernel\Contracts\Aes;
+use EasyWeChat\Kernel\Exceptions\InvalidArgumentException;
 use function openssl_decrypt;
 use function openssl_encrypt;
 use function openssl_error_string;

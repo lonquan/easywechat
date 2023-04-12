@@ -15,6 +15,7 @@ trait InteractWithConfig
 
     /**
      * @param  array<string,mixed>|ConfigInterface  $config
+     *
      * @throws InvalidArgumentException
      */
     public function __construct(array|ConfigInterface $config)

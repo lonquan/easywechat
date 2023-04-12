@@ -16,7 +16,8 @@ class InteractWithHandlersTest extends TestCase
     {
         $m = \Mockery::mock(InteractWithHandlers::class);
 
-        $c = new class () {
+        $c = new class()
+        {
             public function hello()
             {
                 return 'hello';
@@ -28,6 +29,21 @@ class InteractWithHandlersTest extends TestCase
 
         // remove
         $m->withoutHandler([$c, 'hello']);
+
+        $ci = new class()
+        {
+            public function __invoke()
+            {
+                return 'hello invoke';
+            }
+        };
+        $m->with($ci);
+        $this->assertCount(1, $m->getHandlers());
+        $this->assertSame('hello invoke', $m->handle('result'));
+
+        // remove
+        $m->withoutHandler($ci);
+
         $this->assertCount(0, $m->getHandlers());
 
         $this->assertSame('result', $m->handle('result'));
@@ -139,7 +155,7 @@ class InteractWithHandlersTest extends TestCase
         };
 
         $h3 = function ($payload, $next) {
-            return "final result";
+            return 'final result';
         };
 
         $h4 = function ($payload, $next) {

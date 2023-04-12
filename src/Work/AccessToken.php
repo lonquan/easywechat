@@ -6,9 +6,14 @@ namespace EasyWeChat\Work;
 
 use EasyWeChat\Kernel\Contracts\RefreshableAccessToken;
 use EasyWeChat\Kernel\Exceptions\HttpException;
+use function intval;
+use function is_string;
 use JetBrains\PhpStorm\ArrayShape;
+use function json_encode;
+use const JSON_UNESCAPED_UNICODE;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use function sprintf;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\HttpClient;
@@ -18,15 +23,11 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use function intval;
-use function is_string;
-use function json_encode;
-use function sprintf;
-use const JSON_UNESCAPED_UNICODE;
 
 class AccessToken implements RefreshableAccessToken
 {
     protected HttpClientInterface $httpClient;
+
     protected CacheInterface $cache;
 
     public function __construct(
@@ -54,6 +55,7 @@ class AccessToken implements RefreshableAccessToken
 
     /**
      * @return string
+     *
      * @throws HttpException
      * @throws InvalidArgumentException
      * @throws ClientExceptionInterface
@@ -66,16 +68,16 @@ class AccessToken implements RefreshableAccessToken
     {
         $token = $this->cache->get($this->getKey());
 
-        if (!!$token && is_string($token)) {
+        if ((bool) $token && is_string($token)) {
             return $token;
         }
 
         return $this->refresh();
     }
 
-
     /**
      * @return array<string, string>
+     *
      * @throws HttpException
      * @throws InvalidArgumentException
      * @throws ClientExceptionInterface
@@ -84,7 +86,7 @@ class AccessToken implements RefreshableAccessToken
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    #[ArrayShape(['access_token' => "string"])]
+    #[ArrayShape(['access_token' => 'string'])]
     public function toQuery(): array
     {
         return ['access_token' => $this->getToken()];

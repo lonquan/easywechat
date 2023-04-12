@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace EasyWeChat\Work;
+namespace EasyWeChat\OpenWork;
 
 use EasyWeChat\Kernel\Exceptions\HttpException;
 use function intval;
 use function is_string;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use function sprintf;
@@ -48,14 +47,7 @@ class JsApiTicket
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      */
-    #[ArrayShape([
-        'url' => 'string',
-        'nonceStr' => 'string',
-        'timestamp' => 'int',
-        'appId' => 'string',
-        'signature' => 'string',
-    ])]
-    public function createConfigSignature(string $url, string $nonce, int $timestamp): array
+    public function createConfigSignature(string $nonce, int $timestamp, string $url, array $jsApiList = [], bool $debug = false, bool $beta = true): array
     {
         return [
             'appId' => $this->corpId,
@@ -63,6 +55,9 @@ class JsApiTicket
             'timestamp' => $timestamp,
             'url' => $url,
             'signature' => $this->getTicketSignature($this->getTicket(), $nonce, $timestamp, $url),
+            'jsApiList' => $jsApiList,
+            'debug' => $debug,
+            'beta' => $beta,
         ];
     }
 
@@ -109,37 +104,27 @@ class JsApiTicket
 
     public function getKey(): string
     {
-        return $this->key ?? $this->key = sprintf('work.jsapi_ticket.%s', $this->corpId);
+        return $this->key ?? $this->key = sprintf('open_work.jsapi_ticket.%s', $this->corpId);
     }
 
     /**
-     * @return array<string, mixed>
-     *
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws InvalidArgumentException
-     * @throws TransportExceptionInterface
+     * @throws DecodingExceptionInterface
      * @throws HttpException
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
-    #[ArrayShape([
-        'corpid' => 'string',
-        'agentid' => 'int',
-        'nonceStr' => 'string',
-        'timestamp' => 'int',
-        'url' => 'string',
-        'signature' => 'string',
-    ])]
-    public function createAgentConfigSignature(int $agentId, string $url, string $nonce, int $timestamp): array
+    public function createAgentConfigSignature(int $agentId, string $nonce, int $timestamp, string $url, array $jsApiList = []): array
     {
         return [
             'corpid' => $this->corpId,
             'agentid' => $agentId,
             'nonceStr' => $nonce,
             'timestamp' => $timestamp,
-            'url' => $url,
             'signature' => $this->getTicketSignature($this->getAgentTicket($agentId), $nonce, $timestamp, $url),
+            'jsApiList' => $jsApiList,
         ];
     }
 
@@ -161,8 +146,7 @@ class JsApiTicket
             return $ticket;
         }
 
-        $response = $this->httpClient->request('GET', '/cgi-bin/ticket/get', ['query' => ['type' => 'agent_config']])
-            ->toArray(false);
+        $response = $this->httpClient->request('GET', '/cgi-bin/ticket/get', ['query' => ['type' => 'agent_config']])->toArray(false);
 
         if (empty($response['ticket'])) {
             throw new HttpException('Failed to get jssdk agentTicket: '.json_encode($response, JSON_UNESCAPED_UNICODE));

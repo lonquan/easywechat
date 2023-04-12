@@ -14,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
  * @property string $FromUserName
  * @property string $ToUserName
  * @property string $Encrypt
+ *
  * @implements ArrayAccess<array-key, mixed>
  */
 abstract class Message implements ArrayAccess
@@ -30,8 +31,8 @@ abstract class Message implements ArrayAccess
 
     /**
      * @param  ServerRequestInterface  $request
-     *
      * @return Message
+     *
      * @throws BadRequestException
      */
     public static function createFromRequest(ServerRequestInterface $request): Message
@@ -43,6 +44,7 @@ abstract class Message implements ArrayAccess
 
     /**
      * @return array<string,string>
+     *
      * @throws BadRequestException
      */
     public static function format(string $originContent): array
@@ -58,7 +60,7 @@ abstract class Message implements ArrayAccess
             $attributes = $dataSet;
         }
 
-        if (empty($attributes) || !is_array($attributes)) {
+        if (empty($attributes) || ! is_array($attributes)) {
             throw new BadRequestException('Failed to decode request contents.');
         }
 
